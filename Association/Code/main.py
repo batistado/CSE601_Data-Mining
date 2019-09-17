@@ -59,7 +59,7 @@ class DataSet:
                     if len(row.intersection(item_set)) == length:
                         count += 1
 
-                if count > self.support_count:
+                if count >= self.support_count:
                     next_item_set.append(item_set)
 
             self.print_stats(length, len(next_item_set))
