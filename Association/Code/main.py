@@ -2,8 +2,26 @@ import os
 import re
 import sys
 
+class AssociationRule:
+    def __init__(self, head, body):
+        self.head = head
+        self.body = body
+
+    def get_rule(self):
+        return self.head.union(self.body)
+
+    def __hash__(self):
+        return hash(tuple(sorted(self.head) + sorted(self.body)))
+
+    def __eq__(self, other):
+        return sorted(self.head) == sorted(other.head) and sorted(self.body) == sorted(other.body)
+
+    def __repr__(self):
+        return "{} -> {}".format(self.head, self.body)
+
+
 class DataSet:
-    def __init__(self, file_name, path, support):
+    def __init__(self, file_name, path, support, confidence):
         self.file_name = file_name
         self.path = path
         self.rows = []
@@ -11,7 +29,9 @@ class DataSet:
         self.column_count = len(self.rows[0])
         self.transaction_count = len(self.rows)
         self.support_count = support * self.transaction_count // 100
+        self.confidence = confidence
         self.generate_freq_itemsets()
+        self.generate_association_rules()
 
     def read_file(self):
         with open(self.path, 'r') as f:
@@ -68,6 +88,64 @@ class DataSet:
             length += 1
 
     @staticmethod
+    def get_first_level_rules(item_set):
+        next_level_rules = list()
+
+        for item in item_set:
+            next_level_rules.append(AssociationRule(item_set - set([item]), set([item])))
+
+        return next_level_rules
+
+    @staticmethod
+    def generate_next_level_rules(rules, length):
+        next_level_rules = list()
+
+        i = 0
+        while i < len(rules):
+            j = i + 1
+            while j < len(rules):
+                intersection_set = rules[i].head.intersection(rules[j].head)
+                if len(intersection_set) == length:
+                    next_level_rules.append(AssociationRule(intersection_set, rules[i].body.union(rules[j].body)))
+
+                j += 1
+
+            i += 1
+
+
+        return next_level_rules
+
+
+    def generate_association_rules(self):
+        self.association_rules = list()
+
+        for item_set in self.freq_item_set:
+            self.association_rules.append(AssociationRule(item_set, set()))
+            length = len(item_set) - 1
+            current_level_rules = self.get_first_level_rules(item_set)
+
+            while len(current_level_rules) > 0:
+                next_level_rules = list()
+                for rule in current_level_rules:
+                    total_count = head_count = 0
+                    for row in self.rows:
+                        if rule.head.issubset(row):
+                            head_count += 1
+
+                        if rule.get_rule().issubset(row):
+                            total_count += 1
+
+
+                    if total_count / head_count * 100 >= self.confidence:
+                        next_level_rules.append(rule)
+
+                
+                self.association_rules.extend(next_level_rules)
+                current_level_rules = self.generate_next_level_rules(next_level_rules, length - 1)
+                length -= 1
+
+
+    @staticmethod
     def print_stats(length, count):
         print("number of length-{} frequent itemsets:{}".format(length, count))
 
@@ -86,11 +164,11 @@ class DataSet:
 
         return transformed_row
 
-def read_data(support):
+def read_data(support, confidence):
     path = "./../Data/"
     data_sets = []
     for file in os.listdir(os.path.join(os.path.abspath(path))):
-        data_sets.append(DataSet(file, os.path.join(os.path.abspath(path), file), support))
+        data_sets.append(DataSet(file, os.path.join(os.path.abspath(path), file), support, confidence))
 
     return data_sets
 
@@ -98,8 +176,9 @@ def read_data(support):
 def main():
     try:
         support = int(input("Enter the support % required:"))
+        confidence = int(input("Enter the confidence % required:"))
         print("Now Scanning Data directory..")
-        data_sets = read_data(support)
+        data_sets = read_data(support, confidence)
         print("Data Read.")
     except Exception as ex:
         print("Something went wrong. Error: " + str(ex))
