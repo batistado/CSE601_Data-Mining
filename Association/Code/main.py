@@ -17,7 +17,7 @@ class AssociationRule:
         return sorted(self.head) == sorted(other.head) and sorted(self.body) == sorted(other.body)
 
     def __repr__(self):
-        return "{} -> {}".format(self.head, self.body)
+        return "{} -> {}\n".format(self.head, self.body)
 
     def template1(self, part, number, items):
         tmp = set()
@@ -256,8 +256,8 @@ def read_data(support, confidence):
 def query(datasets):
     for dataset in datasets:
         print(dataset.template1("BODY", "1", ['G59_Up']))
-        print(dataset.template2("BODY", 1))
-        print(dataset.template3("1and2", "HEAD", "NONE", ['G10_Down'], "BODY", 2))
+        print(dataset.template2("RULE", 3))
+        print(dataset.template3("1and2", "HEAD", "NONE", ['G10_Down'], "BODY", 3))
 
 
 
