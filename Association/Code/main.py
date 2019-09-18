@@ -19,6 +19,60 @@ class AssociationRule:
     def __repr__(self):
         return "{} -> {}".format(self.head, self.body)
 
+    def template1(self, part, number, items):
+        tmp = set()
+        if part == "HEAD":
+            tmp = self.head
+        elif part == "BODY":
+            tmp = self.body
+        else:
+            tmp = self.head.union(self.body)
+
+        if number == "NONE":
+            return len(tmp.intersection(set(items))) == 0
+        elif number == "ANY":
+            return len(tmp.intersection(set(items))) > 0
+        else:
+            return len(tmp.intersection(set(items))) == number
+
+    def template2(self, part, count):
+        tmp = set()
+
+        if part == "HEAD":
+            tmp = self.head
+        elif part == "BODY":
+            tmp = self.body
+        else:
+            tmp = self.head.union(self.body)
+
+        return len(tmp) >= count
+
+    def template3(self, join, *options):
+        isAnd = True
+        split = join.split("and")
+        if len(split) == 1:
+            split = join.split("or")
+            isAnd = False
+            
+        cond1 = split[0]
+        cond2 = split[1]
+
+        i = 0
+        if cond1 == '1':
+            res1 = self.template1(*options[:3])
+            i = 3
+        else:
+            res1 = self.template2(*options[:2])
+            i = 2
+
+        res2 = self.template1(*options[i:]) if cond2 == '1' else self.template2(*options[i:])
+
+        return (res1 and res2) if isAnd else (res1 or res2)
+
+
+
+
+
 
 class DataSet:
     def __init__(self, file_name, path, support, confidence):
@@ -144,6 +198,33 @@ class DataSet:
                 current_level_rules = self.generate_next_level_rules(next_level_rules, length - 1)
                 length -= 1
 
+    def template1(self, part, number, items):
+        result = set()
+
+        for rule in self.association_rules:
+            if rule.template1(part, number, items):
+                result.add(rule)
+
+        return list(result), len(result)
+
+    def template2(self, part, count):
+        result = set()
+
+        for rule in self.association_rules:
+            if rule.template2(part, count):
+                result.add(rule)
+
+        return list(result), len(result)
+
+    def template3(self, *options):
+        result = set()
+
+        for rule in self.association_rules:
+            if rule.template3(*options):
+                result.add(rule)
+
+        return list(result), len(result)
+
 
     @staticmethod
     def print_stats(length, count):
@@ -172,6 +253,13 @@ def read_data(support, confidence):
 
     return data_sets
 
+def query(datasets):
+    for dataset in datasets:
+        print(dataset.template1("BODY", "1", ['G59_Up']))
+        print(dataset.template2("BODY", 1))
+        print(dataset.template3("1and2", "HEAD", "NONE", ['G10_Down'], "BODY", 2))
+
+
 
 def main():
     try:
@@ -180,6 +268,7 @@ def main():
         print("Now Scanning Data directory..")
         data_sets = read_data(support, confidence)
         print("Data Read.")
+        query(data_sets)
     except Exception as ex:
         print("Something went wrong. Error: " + str(ex))
         exc_type, exc_obj, exc_tb = sys.exc_info()
