@@ -69,11 +69,6 @@ class AssociationRule:
 
         return (res1 and res2) if isAnd else (res1 or res2)
 
-
-
-
-
-
 class DataSet:
     def __init__(self, file_name, path, support, confidence):
         self.file_name = file_name
@@ -174,7 +169,6 @@ class DataSet:
         self.association_rules = list()
 
         for item_set in self.freq_item_set:
-            self.association_rules.append(AssociationRule(item_set, set()))
             length = len(item_set) - 1
             current_level_rules = self.get_first_level_rules(item_set)
 
@@ -190,7 +184,7 @@ class DataSet:
                             total_count += 1
 
 
-                    if total_count / head_count * 100 >= self.confidence:
+                    if total_count / head_count * 100 >= self.confidence and len(rule.body) > 0 and len(rule.head) > 0:
                         next_level_rules.append(rule)
 
                 
@@ -243,13 +237,15 @@ class DataSet:
             transformed_row.add("G{}_{}".format(i, row[i]))
             i += 1
 
+        transformed_row.add(row[i])
+
         return transformed_row
 
 def read_data(support, confidence):
-    path = "./../Data/"
+    path = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'Data'))
     data_sets = []
-    for file in os.listdir(os.path.join(os.path.abspath(path))):
-        data_sets.append(DataSet(file, os.path.join(os.path.abspath(path), file), support, confidence))
+    for file in os.listdir(path):
+        data_sets.append(DataSet(file, os.path.join(path, file), support, confidence))
 
     return data_sets
 

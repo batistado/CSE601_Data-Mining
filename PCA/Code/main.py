@@ -47,13 +47,13 @@ class DataSet:
     @staticmethod
     def get_covariance_matrix(np_matrix):
         return 1 / np_matrix.shape[0] * np_matrix.T.dot(np_matrix)
-    
+
 
 def read_data(dimensions):
-    path = "./../Data/"
+    path = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'Data'))
     data_sets = []
-    for file in os.listdir(os.path.join(os.path.abspath(path))):
-        data_sets.append(DataSet(file, os.path.join(os.path.abspath(path), file), dimensions))
+    for file in os.listdir(path):
+        data_sets.append(DataSet(file, os.path.join(path, file), dimensions))
 
     return data_sets
 
