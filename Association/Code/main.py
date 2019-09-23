@@ -162,6 +162,7 @@ class DataSet:
 
             i += 1
 
+        next_level_rules = list(set(next_level_rules))
 
         return next_level_rules
 
