@@ -2,6 +2,9 @@ import os
 import re
 import sys
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 class DataSet:
     def __init__(self, file_name, path, dimensions):
@@ -22,6 +25,7 @@ class DataSet:
 
         self.create_demeanified_matrix()
         self.create_covariance_matrix()
+        self.plot()
 
     def create_covariance_matrix(self):
         self.eigen_values, self.eigen_vectors = np.linalg.eig(self.get_covariance_matrix(self.float_array))
@@ -33,7 +37,7 @@ class DataSet:
             for index in sorted_indexes:
                 coordinates.append(np.sum(np.multiply(row, self.eigen_vectors[index])))
 
-            self.result_array[i].append(coordinates)
+            self.result_array[i].extend(coordinates)
 
 
     def create_demeanified_matrix(self):
@@ -48,6 +52,20 @@ class DataSet:
     def get_covariance_matrix(np_matrix):
         return 1 / np_matrix.shape[0] * np_matrix.T.dot(np_matrix)
 
+    def plot(self):
+        xcoord = []
+        ycoord = []
+        diseases = []
+
+        for row in self.result_array:
+            xcoord.append(row[1])
+            ycoord.append(row[2])
+            diseases.append(row[0])
+
+        df = pd.DataFrame({'PC1':np.array(xcoord, dtype=np.float32), 'PC2':np.array(ycoord, dtype=np.float32), 'DISEASES': np.array(diseases)})
+        sns.lmplot(x='PC1', y='PC2', data=df, fit_reg=False, hue='DISEASES')
+        plt.show()
+
 
 def read_data(dimensions):
     path = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'Data'))
@@ -59,16 +77,16 @@ def read_data(dimensions):
 
 
 def main():
-    try:
-        dimentions = int(input("Enter the number of dimentions to reduce the datasets to:"))
-        print("Now Scanning Data directory..")
-        data_sets = read_data(dimentions)
-        print("Data Read.")
-    except Exception as ex:
-        print("Something went wrong. Error: " + str(ex))
-        exc_type, exc_obj, exc_tb = sys.exc_info()
-        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        print(exc_type, fname, exc_tb.tb_lineno)
+    # try:
+    dimentions = int(input("Enter the number of dimentions to reduce the datasets to:"))
+    print("Now Scanning Data directory..")
+    data_sets = read_data(dimentions)
+    print("Data Read.")
+    # except Exception as ex:
+        # print("Something went wrong. Error: " + str(ex))
+        # exc_type, exc_obj, exc_tb = sys.exc_info()
+        # fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        # print(exc_type, fname, exc_tb.tb_lineno)
 
 if __name__ == '__main__':
     main()
