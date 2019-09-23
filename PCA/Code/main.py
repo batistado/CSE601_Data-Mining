@@ -6,6 +6,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+from sklearn.manifold import TSNE
+
 class DataSet:
     def __init__(self, file_name, path, dimensions):
         self.file_name = file_name
@@ -23,9 +25,40 @@ class DataSet:
         if self.dimensions > len(self.rows[0]):
             raise Exception("Dimensions can not be more than max dimensions of dataset.")
 
+        np_array = np.array(self.rows)
+        self.result_array = np_array[:, -1:-2:-1].tolist()
+        self.data = np_array[:,:-1].astype(np.float)
+        self.diseases = np_array[:,-1]
+
+        self.PCA()
+        self.SVD()
+        self.TSNE()
+
+    def PCA(self):
         self.create_demeanified_matrix()
         self.create_covariance_matrix()
-        self.plot()
+
+        xcoord = []
+        ycoord = []
+        diseases = []
+
+        for row in self.result_array:
+            xcoord.append(row[1])
+            ycoord.append(row[2])
+            diseases.append(row[0])
+
+        self.plot(np.array(xcoord, dtype=np.float64), np.array(ycoord, dtype=np.float64), self.diseases, self.file_name + " " + "PCA Plot")
+
+    def SVD(self):
+        U, D, V = np.linalg.svd(self.data)
+        self.plot(U[:,0], U[:,1], self.diseases, self.file_name + " " + "SVD Plot")
+
+    def TSNE(self):
+        tsne = TSNE(n_components=2, verbose=1, perplexity=40, n_iter=500)
+        result = tsne.fit_transform(self.data)
+
+        self.plot(result[:,0], result[:,1], self.diseases, self.file_name + " " + "TSNE Plot")
+
 
     def create_covariance_matrix(self):
         self.eigen_values, self.eigen_vectors = np.linalg.eig(self.get_covariance_matrix(self.float_array))
@@ -38,32 +71,22 @@ class DataSet:
                 coordinates.append(np.sum(np.multiply(row, self.eigen_vectors[index])))
 
             self.result_array[i].extend(coordinates)
-
+        
 
     def create_demeanified_matrix(self):
-        np_array = np.array(self.rows)
-        self.result_array = np_array[:, -1:-2:-1].tolist()
-        self.float_array = np_array[:,:-1].astype(np.float)
-        means = np.mean(self.float_array, axis=0)
+        means = np.mean(self.data, axis=0)
 
-        self.float_array = self.float_array - np.vstack([means] * self.float_array.shape[0])
+        self.float_array = self.data - np.vstack([means] * self.data.shape[0])
 
     @staticmethod
     def get_covariance_matrix(np_matrix):
         return 1 / np_matrix.shape[0] * np_matrix.T.dot(np_matrix)
 
-    def plot(self):
-        xcoord = []
-        ycoord = []
-        diseases = []
-
-        for row in self.result_array:
-            xcoord.append(row[1])
-            ycoord.append(row[2])
-            diseases.append(row[0])
-
-        df = pd.DataFrame({'PC1':np.array(xcoord, dtype=np.float32), 'PC2':np.array(ycoord, dtype=np.float32), 'DISEASES': np.array(diseases)})
-        sns.lmplot(x='PC1', y='PC2', data=df, fit_reg=False, hue='DISEASES')
+    @staticmethod
+    def plot(xcoord, ycoord, diseases, title):
+        df = pd.DataFrame({'PC1':xcoord, 'PC2':ycoord, 'Diseases': np.array(diseases)})
+        lm = sns.lmplot(x='PC1', y='PC2', data=df, fit_reg=False, hue='Diseases')
+        lm.fig.suptitle(title)
         plt.show()
 
 
