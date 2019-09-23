@@ -171,7 +171,6 @@ class DataSet:
 
         for item_set in self.freq_item_set:
             length = len(item_set) - 1
-            print(length)
             current_level_rules = self.get_first_level_rules(item_set)
 
             while len(current_level_rules) > 0:
