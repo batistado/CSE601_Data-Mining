@@ -47,17 +47,17 @@ class DataSet:
             ycoord.append(row[2])
             diseases.append(row[0])
 
-        self.plot(np.array(xcoord, dtype=np.float64), np.array(ycoord, dtype=np.float64), self.diseases, self.file_name + " " + "PCA Plot")
+        self.plot(np.array(xcoord, dtype=np.float64), np.array(ycoord, dtype=np.float64), self.diseases, self.file_name.split(".")[0] + " " + "PCA Plot")
 
     def SVD(self):
         U, D, V = np.linalg.svd(self.data)
-        self.plot(U[:,0], U[:,1], self.diseases, self.file_name + " " + "SVD Plot")
+        self.plot(U[:,0], U[:,1], self.diseases, self.file_name.split(".")[0] + " " + "SVD Plot")
 
     def TSNE(self):
         tsne = TSNE(n_components=2, verbose=1, perplexity=40, n_iter=500)
         result = tsne.fit_transform(self.data)
 
-        self.plot(result[:,0], result[:,1], self.diseases, self.file_name + " " + "TSNE Plot")
+        self.plot(result[:,0], result[:,1], self.diseases, self.file_name.split(".")[0] + " " + "TSNE Plot")
 
 
     def create_covariance_matrix(self):
@@ -80,14 +80,16 @@ class DataSet:
 
     @staticmethod
     def get_covariance_matrix(np_matrix):
-        return 1 / np_matrix.shape[0] * np_matrix.T.dot(np_matrix)
+        return 1 / (np_matrix.shape[0] - 1) * np_matrix.T.dot(np_matrix)
 
     @staticmethod
     def plot(xcoord, ycoord, diseases, title):
-        df = pd.DataFrame({'PC1':xcoord, 'PC2':ycoord, 'Diseases': np.array(diseases)})
+        df = pd.DataFrame({'PC1': xcoord, 'PC2': ycoord, 'Diseases': np.array(diseases)})
         lm = sns.lmplot(x='PC1', y='PC2', data=df, fit_reg=False, hue='Diseases')
         lm.fig.suptitle(title)
         plt.show()
+        path = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'Plots'))
+        lm.savefig('{}/{}.png'.format(path, title))
 
 
 def read_data(dimensions):

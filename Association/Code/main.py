@@ -308,9 +308,6 @@ def query(datasets):
         print((result36, cnt))
         print("=======================================================")
     
-
-
-
 def main():
     try:
         support = int(input("Enter the support % required:"))
