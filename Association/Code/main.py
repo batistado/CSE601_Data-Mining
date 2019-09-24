@@ -73,6 +73,7 @@ class DataSet:
     def __init__(self, file_name, path, support, confidence):
         self.file_name = file_name
         self.path = path
+        self.output_file = open(os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'Output', file_name)), 'w')
         self.rows = []
         self.read_file()
 
@@ -82,6 +83,9 @@ class DataSet:
         self.confidence = confidence
         self.generate_freq_itemsets()
         self.generate_association_rules()
+
+    def close_output_file(self):
+        self.output_file.close() 
 
     def read_file(self):
         with open(self.path, 'r') as f:
@@ -116,10 +120,12 @@ class DataSet:
         return [set(item) for item in next_item_set]
 
     def generate_freq_itemsets(self):
+        self.write_to_file("Support is set to {}%".format(str(self.support_count * 100 / self.transaction_count)))
         self.freq_item_set = list()
 
         current_item_set = self.get_unique_items()
 
+        tc = 0
         length = 1
         while len(current_item_set) > 0:
             next_item_set = list()
@@ -132,10 +138,13 @@ class DataSet:
                 if count >= self.support_count:
                     next_item_set.append(item_set)
 
+            tc += len(next_item_set)
             self.print_stats(length, len(next_item_set))
             self.freq_item_set.extend(next_item_set)
             current_item_set = self.generate_next_itemset(next_item_set, length + 1)
             length += 1
+
+        self.write_to_file("number of all lengths frequent itemsets:{}".format(tc))
 
     @staticmethod
     def get_first_level_rules(item_set):
@@ -168,6 +177,8 @@ class DataSet:
 
 
     def generate_association_rules(self):
+        self.write_to_file("Confidence is set to {}%".format(self.confidence))
+
         self.association_rules = list()
 
         for item_set in self.freq_item_set:
@@ -222,10 +233,12 @@ class DataSet:
         return list(result), len(result)
 
 
-    @staticmethod
-    def print_stats(length, count):
-        print("number of length-{} frequent itemsets:{}".format(length, count))
+    def print_stats(self, length, count):
+        self.write_to_file("number of length-{} frequent itemsets:{}".format(length, count))
 
+    def write_to_file(self, line):
+        self.output_file.write(str(line))
+        self.output_file.write("\n")
 
     def __repr__(self):
         return str(self.rows)
@@ -243,6 +256,98 @@ class DataSet:
 
         return transformed_row
 
+    def process_queries(self):
+        self.write_to_file("Now answering queries:")
+        (result11, cnt) = self.template1("RULE", "ANY", ['G59_Up'])
+
+        self.write_to_file(result11)
+        self.write_to_file("Count: {}".format(cnt))
+
+        (result12, cnt) = self.template1("RULE", "NONE", ['G59_Up'])
+        
+        self.write_to_file(result12)
+        self.write_to_file("Count: {}".format(cnt))
+
+        (result13, cnt) = self.template1("RULE", 1, ['G59_Up', 'G10_Down'])
+        
+        self.write_to_file(result13)
+        self.write_to_file("Count: {}".format(cnt))
+
+        (result14, cnt) = self.template1("HEAD", "ANY", ['G59_Up'])
+        
+        self.write_to_file(result14)
+        self.write_to_file("Count: {}".format(cnt))
+
+        (result15, cnt) = self.template1("HEAD", "NONE", ['G59_Up'])
+        
+        self.write_to_file(result15)
+        self.write_to_file("Count: {}".format(cnt))
+
+        (result16, cnt) = self.template1("HEAD", 1, ['G59_Up', 'G10_Down'])
+
+        self.write_to_file(result16)
+        self.write_to_file("Count: {}".format(cnt))
+
+        (result17, cnt) = self.template1("BODY", "ANY", ['G59_Up'])
+        
+        self.write_to_file(result17)
+        self.write_to_file("Count: {}".format(cnt))
+
+        (result18, cnt) = self.template1("BODY", "NONE", ['G59_Up'])
+        
+        self.write_to_file(result18)
+        self.write_to_file("Count: {}".format(cnt))
+
+        (result19, cnt) = self.template1("BODY", 1, ['G59_Up', 'G10_Down'])
+        
+        self.write_to_file(result19)
+        self.write_to_file("Count: {}".format(cnt))
+
+        (result21, cnt) = self.template2("RULE", 3)
+        
+        self.write_to_file(result21)
+        self.write_to_file("Count: {}".format(cnt))
+
+        (result22, cnt) = self.template2("HEAD", 2)
+        
+        self.write_to_file(result22)
+        self.write_to_file("Count: {}".format(cnt))
+
+        (result23, cnt) = self.template2("BODY", 1)
+        
+        self.write_to_file(result23)
+        self.write_to_file("Count: {}".format(cnt))
+
+        (result31, cnt) = self.template3("1or1", "HEAD", "ANY",['G10_Down'], "BODY", 1, ['G59_Up'])
+        
+        self.write_to_file(result31)
+        self.write_to_file("Count: {}".format(cnt))
+
+        (result32, cnt) = self.template3("1and1", "HEAD", "ANY",['G10_Down'], "BODY", 1, ['G59_Up'])
+        
+        self.write_to_file(result32)
+        self.write_to_file("Count: {}".format(cnt))
+
+        (result33, cnt) = self.template3("1or2", "HEAD", "ANY",['G10_Down'], "BODY", 2)
+        
+        self.write_to_file(result33)
+        self.write_to_file("Count: {}".format(cnt))
+
+        (result34, cnt) = self.template3("1and2", "HEAD", "ANY",['G10_Down'], "BODY", 2)
+        
+        self.write_to_file(result34)
+        self.write_to_file("Count: {}".format(cnt))
+
+        (result35, cnt) = self.template3("2or2", "HEAD", 1, "BODY", 2)
+
+        self.write_to_file(result35)
+        self.write_to_file("Count: {}".format(cnt))
+
+        (result36, cnt) = self.template3("2and2", "HEAD", 1, "BODY", 2)
+        
+        self.write_to_file(result36)
+        self.write_to_file("Count: {}".format(cnt))
+
 def read_data(support, confidence):
     path = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'Data'))
     data_sets = []
@@ -253,74 +358,22 @@ def read_data(support, confidence):
 
 def query(datasets):
     for dataset in datasets:
-        (result11, cnt) = dataset.template1("RULE", "ANY", ['G59_Up'])
-        print((result11, cnt))
-        print("=======================================================")
-        (result12, cnt) = dataset.template1("RULE", "NONE", ['G59_Up'])
-        print((result12, cnt))
-        print("=======================================================")
-        (result13, cnt) = dataset.template1("RULE", 1, ['G59_Up', 'G10_Down'])
-        print((result13, cnt))
-        print("=======================================================")
-        (result14, cnt) = dataset.template1("HEAD", "ANY", ['G59_Up'])
-        print((result14, cnt))
-        print("=======================================================")
-        (result15, cnt) = dataset.template1("HEAD", "NONE", ['G59_Up'])
-        print((result15, cnt))
-        print("=======================================================")
-        (result16, cnt) = dataset.template1("HEAD", 1, ['G59_Up', 'G10_Down'])
-        print((result16, cnt))
-        print("=======================================================")
-        (result17, cnt) = dataset.template1("BODY", "ANY", ['G59_Up'])
-        print((result17, cnt))
-        print("=======================================================")
-        (result18, cnt) = dataset.template1("BODY", "NONE", ['G59_Up'])
-        print((result18, cnt))
-        print("=======================================================")
-        (result19, cnt) = dataset.template1("BODY", 1, ['G59_Up', 'G10_Down'])
-        print((result19, cnt))
-        print("=======================================================")
-        (result21, cnt) = dataset.template2("RULE", 3)
-        print((result21, cnt))
-        print("=======================================================")
-        (result22, cnt) = dataset.template2("HEAD", 2)
-        print((result22, cnt))
-        print("=======================================================")
-        (result23, cnt) = dataset.template2("BODY", 1)
-        print((result23, cnt))
-        print("=======================================================")
-        (result31, cnt) = dataset.template3("1or1", "HEAD", "ANY",['G10_Down'], "BODY", 1, ['G59_Up'])
-        print((result31, cnt))
-        print("=======================================================")
-        (result32, cnt) = dataset.template3("1and1", "HEAD", "ANY",['G10_Down'], "BODY", 1, ['G59_Up'])
-        print((result32, cnt))
-        print("=======================================================")
-        (result33, cnt) = dataset.template3("1or2", "HEAD", "ANY",['G10_Down'], "BODY", 2)
-        print((result33, cnt))
-        print("=======================================================")
-        (result34, cnt) = dataset.template3("1and2", "HEAD", "ANY",['G10_Down'], "BODY", 2)
-        print((result34, cnt))
-        print("=======================================================")
-        (result35, cnt) = dataset.template3("2or2", "HEAD", 1, "BODY", 2)
-        print((result35, cnt))
-        print("=======================================================")
-        (result36, cnt) = dataset.template3("2and2", "HEAD", 1, "BODY", 2)
-        print((result36, cnt))
-        print("=======================================================")
+        dataset.process_queries()
+        dataset.close_output_file()
     
 def main():
-    try:
-        support = int(input("Enter the support % required:"))
-        confidence = int(input("Enter the confidence % required:"))
-        print("Now Scanning Data directory..")
-        data_sets = read_data(support, confidence)
-        print("Data Read.")
-        query(data_sets)
-    except Exception as ex:
-        print("Something went wrong. Error: " + str(ex))
-        exc_type, exc_obj, exc_tb = sys.exc_info()
-        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        print(exc_type, fname, exc_tb.tb_lineno)
+    # try:
+    support = int(input("Enter the support % required:"))
+    confidence = int(input("Enter the confidence % required:"))
+    print("Now Scanning Data directory..")
+    data_sets = read_data(support, confidence)
+    print("Data Read.")
+    query(data_sets)
+    # except Exception as ex:
+        # print("Something went wrong. Error: " + str(ex))
+        # exc_type, exc_obj, exc_tb = sys.exc_info()
+        # fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        # print(exc_type, fname, exc_tb.tb_lineno)
 
 if __name__ == '__main__':
     main()

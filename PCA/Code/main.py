@@ -71,6 +71,10 @@ class DataSet:
                 coordinates.append(np.sum(np.multiply(row, self.eigen_vectors[index])))
 
             self.result_array[i].extend(coordinates)
+
+    @staticmethod
+    def get_covariance_matrix(np_matrix):
+        return 1 / (np_matrix.shape[0] - 1) * np_matrix.T.dot(np_matrix)
         
 
     def create_demeanified_matrix(self):
@@ -78,9 +82,7 @@ class DataSet:
 
         self.float_array = self.data - np.vstack([means] * self.data.shape[0])
 
-    @staticmethod
-    def get_covariance_matrix(np_matrix):
-        return 1 / (np_matrix.shape[0] - 1) * np_matrix.T.dot(np_matrix)
+    
 
     @staticmethod
     def plot(xcoord, ycoord, diseases, title):
