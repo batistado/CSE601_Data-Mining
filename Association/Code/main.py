@@ -98,7 +98,7 @@ class DataSet:
         transformed_row = set()
         i = 0
         while i < len(row) - 1:
-            transformed_row.add("G{}_{}".format(i, row[i]))
+            transformed_row.add("G{}_{}".format(i + 1, row[i]))
             i += 1
 
         transformed_row.add(row[i])
