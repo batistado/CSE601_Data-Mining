@@ -93,6 +93,18 @@ class DataSet:
                 line = line.strip()
                 self.rows.append(self.transform_row(re.split("\t+", line)))
 
+    @staticmethod
+    def transform_row(row):
+        transformed_row = set()
+        i = 0
+        while i < len(row) - 1:
+            transformed_row.add("G{}_{}".format(i, row[i]))
+            i += 1
+
+        transformed_row.add(row[i])
+
+        return transformed_row
+
     def get_unique_items(self):
         unique_itemset = set()
 
@@ -205,6 +217,8 @@ class DataSet:
                 current_level_rules = self.generate_next_level_rules(next_level_rules, length - 1)
                 length -= 1
 
+        self.write_to_file("number of association rules:{}".format(len(self.association_rules)))
+
     def template1(self, part, number, items):
         result = set()
 
@@ -243,108 +257,113 @@ class DataSet:
     def __repr__(self):
         return str(self.rows)
 
-        
-    @staticmethod
-    def transform_row(row):
-        transformed_row = set()
-        i = 0
-        while i < len(row) - 1:
-            transformed_row.add("G{}_{}".format(i, row[i]))
-            i += 1
-
-        transformed_row.add(row[i])
-
-        return transformed_row
-
     def process_queries(self):
         self.write_to_file("Now answering queries:")
         (result11, cnt) = self.template1("RULE", "ANY", ['G59_Up'])
 
+        self.write_to_file("Query {}".format("11"))
         self.write_to_file(result11)
         self.write_to_file("Count: {}".format(cnt))
 
         (result12, cnt) = self.template1("RULE", "NONE", ['G59_Up'])
         
+        self.write_to_file("Query {}".format("12"))
         self.write_to_file(result12)
         self.write_to_file("Count: {}".format(cnt))
 
         (result13, cnt) = self.template1("RULE", 1, ['G59_Up', 'G10_Down'])
         
+        self.write_to_file("Query {}".format("13"))
         self.write_to_file(result13)
         self.write_to_file("Count: {}".format(cnt))
 
         (result14, cnt) = self.template1("HEAD", "ANY", ['G59_Up'])
         
+        self.write_to_file("Query {}".format("14"))
         self.write_to_file(result14)
         self.write_to_file("Count: {}".format(cnt))
 
         (result15, cnt) = self.template1("HEAD", "NONE", ['G59_Up'])
         
+        self.write_to_file("Query {}".format("15"))
         self.write_to_file(result15)
         self.write_to_file("Count: {}".format(cnt))
 
         (result16, cnt) = self.template1("HEAD", 1, ['G59_Up', 'G10_Down'])
 
+        self.write_to_file("Query {}".format("16"))
         self.write_to_file(result16)
         self.write_to_file("Count: {}".format(cnt))
 
         (result17, cnt) = self.template1("BODY", "ANY", ['G59_Up'])
         
+        self.write_to_file("Query {}".format("17"))
         self.write_to_file(result17)
         self.write_to_file("Count: {}".format(cnt))
 
         (result18, cnt) = self.template1("BODY", "NONE", ['G59_Up'])
         
+        self.write_to_file("Query {}".format("18"))
         self.write_to_file(result18)
         self.write_to_file("Count: {}".format(cnt))
 
         (result19, cnt) = self.template1("BODY", 1, ['G59_Up', 'G10_Down'])
         
+        self.write_to_file("Query {}".format("19"))
         self.write_to_file(result19)
         self.write_to_file("Count: {}".format(cnt))
 
         (result21, cnt) = self.template2("RULE", 3)
         
+        self.write_to_file("Query {}".format("21"))
         self.write_to_file(result21)
         self.write_to_file("Count: {}".format(cnt))
 
         (result22, cnt) = self.template2("HEAD", 2)
         
+        self.write_to_file("Query {}".format("22"))
         self.write_to_file(result22)
         self.write_to_file("Count: {}".format(cnt))
 
         (result23, cnt) = self.template2("BODY", 1)
         
+        self.write_to_file("Query {}".format("23"))
         self.write_to_file(result23)
         self.write_to_file("Count: {}".format(cnt))
 
         (result31, cnt) = self.template3("1or1", "HEAD", "ANY",['G10_Down'], "BODY", 1, ['G59_Up'])
         
+        self.write_to_file("Query {}".format("31"))
         self.write_to_file(result31)
         self.write_to_file("Count: {}".format(cnt))
 
         (result32, cnt) = self.template3("1and1", "HEAD", "ANY",['G10_Down'], "BODY", 1, ['G59_Up'])
         
+        self.write_to_file("Query {}".format("32"))
         self.write_to_file(result32)
         self.write_to_file("Count: {}".format(cnt))
 
         (result33, cnt) = self.template3("1or2", "HEAD", "ANY",['G10_Down'], "BODY", 2)
         
+        self.write_to_file("Query {}".format("33"))
         self.write_to_file(result33)
         self.write_to_file("Count: {}".format(cnt))
 
         (result34, cnt) = self.template3("1and2", "HEAD", "ANY",['G10_Down'], "BODY", 2)
         
+        self.write_to_file("Query {}".format("34"))
         self.write_to_file(result34)
         self.write_to_file("Count: {}".format(cnt))
 
         (result35, cnt) = self.template3("2or2", "HEAD", 1, "BODY", 2)
 
+        self.write_to_file("Query {}".format("35"))
         self.write_to_file(result35)
         self.write_to_file("Count: {}".format(cnt))
 
         (result36, cnt) = self.template3("2and2", "HEAD", 1, "BODY", 2)
         
+        self.write_to_file("Query {}".format("36"))
         self.write_to_file(result36)
         self.write_to_file("Count: {}".format(cnt))
 
