@@ -362,18 +362,18 @@ def query(datasets):
         dataset.close_output_file()
     
 def main():
-    # try:
-    support = int(input("Enter the support % required:"))
-    confidence = int(input("Enter the confidence % required:"))
-    print("Now Scanning Data directory..")
-    data_sets = read_data(support, confidence)
-    print("Data Read.")
-    query(data_sets)
-    # except Exception as ex:
-        # print("Something went wrong. Error: " + str(ex))
-        # exc_type, exc_obj, exc_tb = sys.exc_info()
-        # fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        # print(exc_type, fname, exc_tb.tb_lineno)
+    try:
+        support = int(input("Enter the support % required:"))
+        confidence = int(input("Enter the confidence % required:"))
+        print("Now Scanning Data directory..")
+        data_sets = read_data(support, confidence)
+        print("Data Read.")
+        query(data_sets)
+    except Exception as ex:
+        print("Something went wrong. Error: " + str(ex))
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
 
 if __name__ == '__main__':
     main()
