@@ -51,6 +51,7 @@ class DataSet:
 
     def SVD(self):
         U, D, V = np.linalg.svd(self.data)
+
         self.plot(U[:,0], U[:,1], self.diseases, self.file_name.split(".")[0] + " " + "SVD Plot")
 
     def TSNE(self):
@@ -64,13 +65,13 @@ class DataSet:
         self.eigen_values, self.eigen_vectors = np.linalg.eig(self.get_covariance_matrix(self.float_array))
         sorted_indexes = np.flip(np.argsort(self.eigen_values))[:self.dimensions]
 
-        
         for i, row in enumerate(self.float_array):
             coordinates = []
             for index in sorted_indexes:
-                coordinates.append(np.sum(np.multiply(row, self.eigen_vectors[index])))
+                coordinates.append(np.dot(row, self.eigen_vectors[:,index]))
 
             self.result_array[i].extend(coordinates)
+
 
     @staticmethod
     def get_covariance_matrix(np_matrix):
